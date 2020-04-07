@@ -1,4 +1,17 @@
-#!/bin/bash
+#!/usr/bin/env bb
 
-./scripts/pack
-clojure -A:deploy target/pathom-viz-connector.jar
+(defn prompt
+  ([question] (prompt question identity))
+  ([question coercion]
+   (print (str question ": "))
+   (flush)
+   (let [response (str/trim (read-line))]
+     (coercion response))))
+
+(let [login    (prompt "Clojars username")
+      password (prompt "Clojars password")
+      new-env  (assoc (into {} (System/getenv)) "CLOJARS_USERNAME" login "CLOJARS_PASSWORD" password)]
+  (println "Packing...")
+  (shell/sh "./scripts/pack")
+  (println "Deploying...")
+  (println (:out (shell/sh "clojure" "-A:deploy" "target/pathom-viz-connector.jar" :env new-env))))
