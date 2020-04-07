@@ -1,0 +1,14 @@
+# Created by .ignore support plugin (hsz.mobi)
+### Clojure template
+*.jar
+*.class
+/lib/
+/classes/
+/target/
+/checkouts/
+.lein-deps-sum
+.lein-repl-history
+.lein-plugins/
+.lein-failures
+.nrepl-port
+.cpcache/
