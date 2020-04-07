@@ -1,0 +1,3 @@
+#!/bin/bash
+
+clojure -A:pack mach.pack.alpha.skinny --project-path target/pathom-viz-connector.jar
