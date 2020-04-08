@@ -82,7 +82,8 @@
 ;;;;
 
 (defn send-message! [send-ch msg]
-  (put! send-ch msg))
+  (put! send-ch msg)
+  (wap/await! msg))
 
 (defn handle-pathom-viz-message
   [{::keys [parser send-ch]}
@@ -116,5 +117,5 @@
         (let-chan [res (parser env tx)]
           (send-message! send-ch {::type       ::pathom-request-done
                                   ::request-id id
-                                  ::response   tx})
+                                  ::response   res})
           res)))))
