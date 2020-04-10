@@ -16,4 +16,17 @@
   :dev
   {:extra-deps {binaryage/devtools   {:mvn/version "0.9.10"}
                 thheller/shadow-cljs {:mvn/version "2.8.93"}
-                nubank/workspaces    {:mvn/version "1.0.15"}}}}}
+                nubank/workspaces    {:mvn/version "1.0.15"}}}
+
+  :pack
+  {:extra-deps {pack/pack.alpha {:git/url "https://github.com/juxt/pack.alpha.git"
+                                 :sha     "c70740ffc10805f34836da2160fa1899601fac02"}}
+   :main-opts  ["-m"]}
+
+  :deploy
+  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+   :main-opts  ["-m" "deps-deploy.deps-deploy" "deploy"]}
+
+  :install
+  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+   :main-opts  ["-m" "deps-deploy.deps-deploy" "install"]}}}
