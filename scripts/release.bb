@@ -12,6 +12,6 @@
       password (prompt "Clojars password")
       new-env  (assoc (into {} (System/getenv)) "CLOJARS_USERNAME" login "CLOJARS_PASSWORD" password)]
   (println "Packing...")
-  (shell/sh "./scripts/pack")
+  (shell/sh "clojure" "-A:pack")
   (println "Deploying...")
   (println (:out (shell/sh "clojure" "-A:deploy" "target/pathom-viz-connector.jar" :env new-env))))
