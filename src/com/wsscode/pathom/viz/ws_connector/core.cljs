@@ -56,7 +56,7 @@
               (js/console.log "SEND" msg)
               (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id)]))
             (do
-              (js/console.log (str "Waiting for channel to be ready"))
+              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
           (recur (if open? 1 (inc attempt))))))
 
@@ -70,7 +70,7 @@
                   (if (= id :com.wsscode.node-ws-server/message)
                     (on-message {} ?data))))
             (do
-              (js/console.log (str "Waiting for channel to be ready"))
+              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
           (recur (if open? 1 (inc attempt))))))))
 
