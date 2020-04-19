@@ -1,4 +1,4 @@
 #!/bin/bash
 
 clojure -A:pack
-clojure -A:install target/pathom-viz-connector.jar
+clojure -A:install

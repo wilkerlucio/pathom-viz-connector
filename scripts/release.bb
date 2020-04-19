@@ -14,4 +14,4 @@
   (println "Packing...")
   (shell/sh "clojure" "-A:pack")
   (println "Deploying...")
-  (println (:out (shell/sh "clojure" "-A:deploy" "target/pathom-viz-connector.jar" :env new-env))))
+  (println (:out (shell/sh "clojure" "-A:deploy" :env new-env))))
