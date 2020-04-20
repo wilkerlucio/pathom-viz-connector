@@ -7,19 +7,20 @@
   [(pc/constantly-resolver :works-here? "WORKS!!")])
 
 (def parser
-  (cond->> (p/parser
-             {::p/env     {::p/reader               [p/map-reader
-                                                     pc/reader3
-                                                     pc/open-ident-reader
-                                                     p/env-placeholder-reader]
-                           ::p/placeholder-prefixes #{">"}}
-              ::p/mutate  pc/mutate
-              ::p/plugins [(pc/connect-plugin {::pc/register registry})
-                           p/error-handler-plugin
-                           p/trace-plugin]})
-    true
-    (p.connector/connect-parser
-      {::p.connector/parser-id ::my-parser})))
+  (p/parser
+    {::p/env     {::p/reader               [p/map-reader
+                                            pc/reader3
+                                            pc/open-ident-reader
+                                            p/env-placeholder-reader]
+                  ::p/placeholder-prefixes #{">"}}
+     ::p/mutate  pc/mutate
+     ::p/plugins [(pc/connect-plugin {::pc/register registry})
+                  p/error-handler-plugin
+                  p/trace-plugin]}))
 
 (comment
+  (p.connector/connect-parser
+    parser
+    {::p.connector/parser-id ::my-parser})
+
   (parser {} [:works-here?]))
