@@ -4,7 +4,7 @@
             [com.wsscode.pathom.connect :as pc]))
 
 (def registry
-  [(pc/constantly-resolver :works "WORKS!!")])
+  [(pc/constantly-resolver :works-here? "WORKS!!")])
 
 (def parser
   (cond->> (p/parser
@@ -22,4 +22,4 @@
       {::p.connector/parser-id ::my-parser})))
 
 (comment
-  (parser {} [:works]))
+  (parser {} [:works-here?]))

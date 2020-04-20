@@ -51,20 +51,21 @@
     (reset! server* nil)))
 
 (defn start-http-server! [config parser]
-  (if-not @server*
-    (let [client-id (or (:com.wsscode.pathom.viz.ws-connector.core/parser-id config)
-                        (UUID/randomUUID))
-          port      (random-port)]
-      (let [local-http-address (str "http://localhost:" port "/")
-            config'            (assoc config
-                                 ::port port
-                                 ::local-http-address local-http-address)
-            server             (server/run-server #(handler (merge % config')) {:port port})]
-        (swap! parsers* assoc client-id parser)
-        (reset! server* (assoc config' ::server server))
-        (assoc config'
-          :com.wsscode.node-ws-server/client-id client-id
-          ::server server)))))
+  (let [client-id (or (:com.wsscode.pathom.viz.ws-connector.core/parser-id config)
+                      (UUID/randomUUID))]
+    (swap! parsers* assoc client-id parser)
+    (if @server*
+      (assoc @server* :com.wsscode.node-ws-server/client-id client-id)
+      (let [port (random-port)]
+        (let [local-http-address (str "http://localhost:" port "/")
+              config'            (assoc config
+                                   ::port port
+                                   ::local-http-address local-http-address)
+              server             (server/run-server #(handler (merge % config')) {:port port})]
+          (reset! server* (assoc config' ::server server))
+          (assoc config'
+            :com.wsscode.node-ws-server/client-id client-id
+            ::server server))))))
 
 (defn connect-parser [config parser]
   (let [config' (start-http-server! config parser)]
@@ -73,7 +74,8 @@
      #(send-message! config' %)}))
 
 (comment
-  (def s (start-http-server! {} (fn [_ _] {})))
+  (start-http-server! {:com.wsscode.pathom.viz.ws-connector.core/parser-id "testing"}
+    (fn [_ _] {:hello "world"}))
 
   (def s (server/run-server handler {:port 13003}))
   (server/close))

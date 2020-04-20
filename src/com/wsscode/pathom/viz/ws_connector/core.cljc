@@ -1,9 +1,11 @@
 (ns com.wsscode.pathom.viz.ws-connector.core
   (:require
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
-    [com.wsscode.async.async-cljs :refer [let-chan]]
+    [#?(:clj  com.wsscode.async.async-clj
+        :cljs com.wsscode.async.async-cljs) :refer [let-chan]]
     #?(:clj  [com.wsscode.pathom.viz.ws-connector.impl.http-clj :as http-clj]
-       :cljs [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs])))
+       :cljs [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs])
+    [com.wsscode.async.processing :as wap]))
 
 (>def ::host string?)
 (>def ::port pos-int?)
@@ -42,12 +44,12 @@
   In Clojurescript this will connect to the app using websockets. In Clojure the comms
   are done via HTTP.
   "
-  [{::keys [auto-trace?] :as config} parser]
-  (let [config' (merge {::auto-trace? true} config)
+  [config parser]
+  (let [{::keys [auto-trace?] :as config'} (merge {::auto-trace? true} config)
         {::keys [send-message!]} (call-connector-impl config' parser)]
 
     (fn connected-parser [env tx]
-      (let [id (random-uuid)]
+      (let [id (wap/random-request-id)]
         (send-message! {::type       ::pathom-request
                         ::request-id id
                         ::tx         tx})
