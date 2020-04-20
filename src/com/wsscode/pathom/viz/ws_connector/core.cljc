@@ -2,7 +2,8 @@
   (:require
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
-    [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs]))
+    #?(:clj  [com.wsscode.pathom.viz.ws-connector.impl.http-clj :as http-clj]
+       :cljs [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs])))
 
 (>def ::host string?)
 (>def ::port pos-int?)
@@ -12,6 +13,10 @@
 (>def ::on-message fn?)
 (>def ::parser-id any?)
 (>def ::auto-trace? boolean?)
+
+(defn- call-connector-impl [config parser]
+  #?(:clj  (http-clj/connect-parser config parser)
+     :cljs (sente-cljs/connect-parser config parser)))
 
 (defn connect-parser
   "Connect a Pathom parser to the Pathom Viz desktop app. The return of this function
@@ -39,7 +44,7 @@
   "
   [{::keys [auto-trace?] :as config} parser]
   (let [config' (merge {::auto-trace? true} config)
-        {::keys [send-message!]} (sente-cljs/connect-parser config' parser)]
+        {::keys [send-message!]} (call-connector-impl config' parser)]
 
     (fn connected-parser [env tx]
       (let [id (random-uuid)]
