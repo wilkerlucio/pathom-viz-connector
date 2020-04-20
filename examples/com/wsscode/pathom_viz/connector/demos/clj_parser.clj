@@ -4,7 +4,8 @@
             [com.wsscode.pathom.connect :as pc]))
 
 (def registry
-  [(pc/constantly-resolver :works-here? "WORKS!!")])
+  [(pc/constantly-resolver :pi Math/PI)
+   (pc/single-attr-resolver :pi :tau #(* 2 %))])
 
 (def parser
   (p/parser
@@ -19,8 +20,9 @@
                   p/trace-plugin]}))
 
 (comment
-  (p.connector/connect-parser
-    parser
-    {::p.connector/parser-id ::my-parser})
+  (def tracked-parser
+    (p.connector/connect-parser
+      {::p.connector/parser-id ::my-parser}
+      parser))
 
-  (parser {} [:works-here?]))
+  (tracked-parser {} [:works-here?]))
