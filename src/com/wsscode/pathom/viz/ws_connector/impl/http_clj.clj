@@ -6,6 +6,9 @@
             [com.wsscode.transit :as t])
   (:import (java.util UUID)))
 
+(defonce server* (atom nil))
+(defonce parsers* (atom {}))
+
 (defn random-port []
   (+ 10000 (rand-int 5000)))
 
@@ -23,46 +26,51 @@
   (wap/await! msg))
 
 (defn handler
-  [{::keys [parser]
-    :as    request}]
+  [request]
   (let [{:com.wsscode.pathom.viz.ws-connector.core/keys [type]
+         :com.wsscode.node-ws-server/keys               [client-id]
          :edn-query-language.core/keys                  [query]
          :as                                            msg}
         (-> request :body slurp t/read)]
-    (case type
-      :com.wsscode.pathom.viz.ws-connector.core/parser-request
-      (let [res (<?!maybe (parser {} query))]
-        (send-message! request (wap/reply-message msg res)))
+    (if-let [parser (get @parsers* client-id)]
+      (case type
+        :com.wsscode.pathom.viz.ws-connector.core/parser-request
+        (let [res (<?!maybe (parser {} query))]
+          (send-message! request (wap/reply-message msg res)))
 
-      (println "Unknown message received" msg))))
+        (println "Unknown message received" msg)))))
 
 (defn send-connect-message! [config]
   (send-message! config
     {:com.wsscode.pathom.viz.ws-connector.core/type
      :com.wsscode.pathom.viz.ws-connector.core/ping}))
 
-(defn stop! [{::keys [server]}]
-  (server :timeout 100))
+(defn stop! []
+  (when-let [{::keys [server]} @server*]
+    (server :timeout 100)
+    (reset! server* nil)))
 
 (defn start-http-server! [config parser]
-  (let [client-id (or (:com.wsscode.pathom.viz.ws-connector.core/parser-id config)
-                      (UUID/randomUUID))
-        port      (random-port)]
-    (let [local-http-address (str "http://localhost:" port "/")
-          config'            (assoc config
-                               ::parser parser
-                               ::port port
-                               ::local-http-address local-http-address
-                               :com.wsscode.node-ws-server/client-id client-id)
-          server             (server/run-server #(handler (merge % config')) {:port port})]
-      (assoc config'
-        ::server server))))
+  (if-not @server*
+    (let [client-id (or (:com.wsscode.pathom.viz.ws-connector.core/parser-id config)
+                        (UUID/randomUUID))
+          port      (random-port)]
+      (let [local-http-address (str "http://localhost:" port "/")
+            config'            (assoc config
+                                 ::port port
+                                 ::local-http-address local-http-address)
+            server             (server/run-server #(handler (merge % config')) {:port port})]
+        (swap! parsers* assoc client-id parser)
+        (reset! server* (assoc config' ::server server))
+        (assoc config'
+          :com.wsscode.node-ws-server/client-id client-id
+          ::server server)))))
 
 (defn connect-parser [config parser]
   (let [config' (start-http-server! config parser)]
     (send-connect-message! config')
     {:com.wsscode.pathom.viz.ws-connector.core/send-message!
-     (fn [msg] (println "nada"))}))
+     #(send-message! config' %)}))
 
 (comment
   (def s (start-http-server! {} (fn [_ _] {})))
