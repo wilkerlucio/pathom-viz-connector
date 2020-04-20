@@ -32,13 +32,14 @@
          :edn-query-language.core/keys                  [query]
          :as                                            msg}
         (-> request :body slurp t/read)]
-    (if-let [parser (get @parsers* client-id)]
-      (case type
-        :com.wsscode.pathom.viz.ws-connector.core/parser-request
-        (let [res (<?!maybe (parser {} query))]
-          (send-message! request (wap/reply-message msg res)))
+    (if-not (wap/capture-response! msg)
+      (if-let [parser (get @parsers* client-id)]
+        (case type
+          :com.wsscode.pathom.viz.ws-connector.core/parser-request
+          (let [res (<?!maybe (parser {} query))]
+            (send-message! request (wap/reply-message msg res)))
 
-        (println "Unknown message received" msg)))))
+          (println "Unknown message received" msg))))))
 
 (defn send-connect-message! [config]
   (send-message! config
