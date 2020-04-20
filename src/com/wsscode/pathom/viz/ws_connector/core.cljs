@@ -1,14 +1,8 @@
 (ns com.wsscode.pathom.viz.ws-connector.core
   (:require
-    [cljs.core.async :as async :refer [>! <! go go-loop put!]]
-    [clojure.pprint :refer [pprint]]
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
-    [com.wsscode.async.processing :as wap]
-    [com.wsscode.transit :as wsst]
-    [taoensso.encore :as enc]
-    [taoensso.sente :as sente]
-    [taoensso.sente.packers.transit :as st]))
+    [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs]))
 
 (>def ::host string?)
 (>def ::port pos-int?)
@@ -17,105 +11,43 @@
 (>def ::on-disconnect fn?)
 (>def ::on-message fn?)
 (>def ::parser-id any?)
+(>def ::auto-trace? boolean?)
 
-(defn make-packer
-  "Returns a json packer for use with sente."
-  [{:keys [read write]}]
-  (st/->TransitPacker :json
-    {:handlers (merge {"default" (wsst/->DefaultHandler)} write)}
-    {:handlers (or read {})}))
+(defn connect-parser
+  "Connect a Pathom parser to the Pathom Viz desktop app. The return of this function
+  is a new parser, which will log all queries done to it in the app, a suggested
+  pattern to use:
 
-(goog-define DEFAULT_HOST "localhost")
-(goog-define DEFAULT_PORT 8240)
+    (def parser
+      (cond->> (p/parser ...)
+        dev-mode?
+        (p.connector/connect-parser
+          {::p.connector/parser-id ::my-parser})))
 
-(def backoff-ms #(enc/exp-backoff % {:max 1000}))
+  Make that dev flag something you can turn off in production. This way you can see
+  the request in the app as they happen.
 
-(defn start-ws-messaging!
-  [{::keys [host path port on-connect on-disconnect on-message
-            send-ch parser-id]}]
-  (let [client-id
-        (str (or parser-id (random-uuid)))
+  The configuration options available are:
 
-        sente-socket-client
-        (sente/make-channel-socket-client! (or path "/chsk") "no-token-desired"
-          {:type           :auto
-           :host           (or host DEFAULT_HOST)
-           :port           (or port DEFAULT_PORT)
-           :protocol       :http
-           :packer         (make-packer {})
-           :client-uuid    client-id
-           :wrap-recv-evs? false
-           :backoff-ms-fn  backoff-ms})]
+    - `::p.connector/host` (default: localhost) Host of the desktop app background server.
+    - `::p.connector/port` (default: 8240) Port of app background server
+    - `::p.connector/parser-id` - An id for this parser, make it unique for this parser
+      so the app can have better memory about it
 
-    ; processing for queue to send data to the server
-    (let [{:keys [state send-fn]} sente-socket-client]
-      (go-loop [attempt 1]
-        (let [open? (:open? @state)]
-          (if open?
-            (when-let [msg (<! send-ch)]
-              (js/console.log "SEND" msg)
-              (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id)]))
-            (do
-              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
-              (async/<! (async/timeout (backoff-ms attempt)))))
-          (recur (if open? 1 (inc attempt))))))
+  In Clojurescript this will connect to the app using websockets. In Clojure the comms
+  are done via HTTP.
+  "
+  [{::keys [auto-trace?] :as config} parser]
+  (let [config' (merge {::auto-trace? true} config)
+        {::keys [send-message!]} (sente-cljs/connect-parser config' parser)]
 
-    ; processing messages from the server
-    (let [{:keys [state ch-recv]} sente-socket-client]
-      (go-loop [attempt 1]
-        (let [open? (:open? @state)]
-          (if open?
-            (do (let [{:keys [id ?data] :as evt} (<! ch-recv)]
-                  (js/console.log "MSG RECEIVED" (dissoc evt :ch-recv))
-                  (if (= id :com.wsscode.node-ws-server/message)
-                    (on-message {} ?data))))
-            (do
-              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
-              (async/<! (async/timeout (backoff-ms attempt)))))
-          (recur (if open? 1 (inc attempt))))))))
-
-(defn connect-ws!
-  [config]
-  (js/console.log "Connecting to websocket" config)
-  (start-ws-messaging! config))
-
-;;;;
-
-(defn send-message! [send-ch msg]
-  (put! send-ch msg)
-  (wap/await! msg))
-
-(defn handle-pathom-viz-message
-  [{::keys [parser send-ch]}
-   {::keys                        [type]
-    :edn-query-language.core/keys [query]
-    :as                           msg}]
-  (case type
-    ::parser-request
-    (let-chan [res (parser {} query)]
-      (send-message! send-ch (wap/reply-message msg res)))
-
-    (js/console.warn "Unknown message received" msg)))
-
-(defn connect-parser [config parser]
-  (let [send-ch (async/chan (async/dropping-buffer 50000))
-        config' (assoc config ::parser parser ::send-ch send-ch)]
-    (connect-ws!
-      (merge
-        {::on-message
-         (fn [_ msg]
-           (handle-pathom-viz-message config' msg))
-
-         ::send-ch
-         send-ch}
-        config))
-    (fn [env tx]
+    (fn connected-parser [env tx]
       (let [id (random-uuid)]
-        (send-message! send-ch {::type       ::pathom-request
-                                ::request-id id
-                                ::tx         tx})
-        (let-chan [res (parser env tx)]
-          (send-message! send-ch {::type       ::pathom-request-done
-                                  ::request-id id
-                                  ::response   res})
+        (send-message! {::type       ::pathom-request
+                        ::request-id id
+                        ::tx         tx})
+        (let-chan [res (parser env (cond-> tx auto-trace? (conj :com.wsscode.pathom/trace)))]
+          (send-message! {::type       ::pathom-request-done
+                          ::request-id id
+                          ::response   res})
           res)))))
