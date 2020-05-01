@@ -3,7 +3,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.wsscode</groupId>
   <artifactId>pathom-viz-connector</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.2</version>
   <name>pathom-viz-connector</name>
   <dependencies>
     <dependency>
@@ -35,6 +35,11 @@
       <groupId>com.cognitect</groupId>
       <artifactId>transit-clj</artifactId>
       <version>1.0.324</version>
+    </dependency>
+    <dependency>
+      <groupId>http-kit</groupId>
+      <artifactId>http-kit</artifactId>
+      <version>2.3.0</version>
     </dependency>
   </dependencies>
   <build>
