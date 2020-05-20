@@ -1,10 +1,12 @@
 (ns com.wsscode.pathom-viz.connector.demos.clj-parser
   (:require [com.wsscode.pathom.viz.ws-connector.core :as p.connector]
             [com.wsscode.pathom.core :as p]
-            [com.wsscode.pathom.connect :as pc]))
+            [com.wsscode.pathom.connect :as pc])
+  (:import (java.time LocalDate)))
 
 (def registry
   [(pc/constantly-resolver :pi Math/PI)
+   (pc/constantly-resolver :bad (LocalDate/now))
    (pc/single-attr-resolver :pi :tau #(* 2 %))])
 
 (def parser
