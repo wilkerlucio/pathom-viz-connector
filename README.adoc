@@ -23,6 +23,15 @@ standalone tool.
 {:deps {com.wsscode/pathom-viz-connector {:mvn/version "RELEASE"}}}
 ----
 
+== JS deps
+
+When using from Clojurescript, you need to have the `websockets` dependency:
+
+[source]
+----
+npm i websocket
+----
+
 == Connecting parsers
 
 WARNING: Currently the connector only works in ClojureScript, Clojure version in development
@@ -44,7 +53,7 @@ To connect the parser with the electron, follow the example:
   [(pc/constantly-resolver :works "WORKS!!")])
 
 (def parser
-  (cond-> (p/parser
+  (cond->> (p/parser
             {::p/env     {::p/reader               [p/map-reader
                                                     pc/reader3
                                                     pc/open-ident-reader

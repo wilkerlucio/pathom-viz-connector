@@ -25,6 +25,7 @@
   (def tracked-parser
     (p.connector/connect-parser
       {::p.connector/parser-id ::my-parser}
-      parser))
+      (fn [env tx]
+        (parser (assoc env :extra-connector-stuff "bla") tx))))
 
   (tracked-parser {} [:works-here?]))
