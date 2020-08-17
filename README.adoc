@@ -34,8 +34,6 @@ npm i websocket
 
 == Connecting parsers
 
-WARNING: Currently the connector only works in ClojureScript, Clojure version in development
-
 To connect the parser with the electron, follow the example:
 
 [source,clojure]
