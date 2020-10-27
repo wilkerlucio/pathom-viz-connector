@@ -49,7 +49,6 @@
         (let [open? (:open? @state)]
           (if open?
             (when-let [msg (<! send-ch)]
-              (js/console.log "SEND" msg)
               (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id)]))
             (do
               (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
@@ -62,7 +61,6 @@
         (let [open? (:open? @state)]
           (if open?
             (do (let [{:keys [id ?data] :as evt} (<! ch-recv)]
-                  (js/console.log "MSG RECEIVED" (dissoc evt :ch-recv))
                   (if (= id :com.wsscode.node-ws-server/message)
                     (on-message {} ?data))))
             (do
