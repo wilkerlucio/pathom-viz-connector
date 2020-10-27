@@ -5,8 +5,8 @@
  {com.cognitect/transit-clj  {:mvn/version "1.0.324"}
   com.cognitect/transit-cljs {:mvn/version "0.8.256"}
   com.fulcrologic/guardrails {:mvn/version "0.0.12"}
-  com.taoensso/sente         {:mvn/version "1.15.0"}
-  com.wsscode/async          {:mvn/version "1.0.4"}
+  com.taoensso/sente         {:mvn/version "1.16.0"}
+  com.wsscode/async          {:mvn/version "1.0.11"}
   http-kit                   {:mvn/version "2.3.0"}}
 
  :aliases
