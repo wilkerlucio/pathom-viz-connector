@@ -183,3 +183,15 @@
 
     (-> env
         (p.plugin/register track-requests))))
+
+(defonce logs-connection
+  (memoize
+    (fn []
+      (call-connector-impl {::pvc/parser-id :pathom.viz.hidden/logs
+                            ::pvc/hidden?   true}
+        (fn [_ _] {})))))
+
+(defn log-entry [msg]
+  (let [{::pvc/keys [send-message!]} (logs-connection)]
+    (send-message! {::pvc/type  ::pvc/log-entry
+                    ::pvc/entry msg})))
