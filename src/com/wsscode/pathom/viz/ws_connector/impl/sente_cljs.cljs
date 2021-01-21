@@ -2,6 +2,7 @@
   (:require
     [cljs.core.async :as async :refer [>! <! go go-loop put!]]
     [clojure.pprint :refer [pprint]]
+    [cognitect.transit :as t]
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
@@ -16,7 +17,8 @@
   "Returns a json packer for use with sente."
   [{:keys [read write]}]
   (st/->TransitPacker :json
-    {:handlers (merge {"default" (wsst/->DefaultHandler)} write)}
+    {:handlers  (merge {"default" (wsst/->DefaultHandler)} write)
+     :transform t/write-meta}
     {:handlers (or read {})}))
 
 (goog-define DEFAULT_HOST "localhost")
