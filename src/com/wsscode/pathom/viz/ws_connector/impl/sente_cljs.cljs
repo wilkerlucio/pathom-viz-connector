@@ -6,9 +6,11 @@
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
     [com.wsscode.transit :as wsst]
+    [com.wsscode.promesa.bridges.core-async]
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
-    [taoensso.sente.packers.transit :as st]))
+    [taoensso.sente.packers.transit :as st]
+    [promesa.core :as p]))
 
 (defn make-packer
   "Returns a json packer for use with sente."
@@ -86,7 +88,7 @@
     :as                                            msg}]
   (case type
     :com.wsscode.pathom.viz.ws-connector.core/parser-request
-    (let-chan [res (parser {} query)]
+    (p/let [res (parser {} query)]
       (send-message! send-ch (wap/reply-message msg res)))
 
     (js/console.warn "Unknown message received" msg)))

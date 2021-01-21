@@ -2,18 +2,20 @@
  ["src"]
 
  :deps
- {com.cognitect/transit-clj  {:mvn/version "1.0.324"}
-  com.cognitect/transit-cljs {:mvn/version "0.8.256"}
-  com.fulcrologic/guardrails {:mvn/version "0.0.12"}
-  com.taoensso/sente         {:mvn/version "1.16.0"}
-  com.wsscode/async          {:mvn/version "1.0.11"}
-  http-kit                   {:mvn/version "2.3.0"}}
+ {com.cognitect/transit-clj   {:mvn/version "1.0.324"}
+  com.cognitect/transit-cljs  {:mvn/version "0.8.256"}
+  com.fulcrologic/guardrails  {:mvn/version "0.0.12"}
+  com.taoensso/sente          {:mvn/version "1.16.0"}
+  com.wsscode/async           {:mvn/version "1.0.11"}
+  http-kit                    {:mvn/version "2.3.0"}
+  com.wsscode/promesa-bridges {:mvn/version "2021.01.20"}}
 
  :aliases
  {:provided
   {:extra-deps {org.clojure/clojure       {:mvn/version "1.10.1"}
                 org.clojure/clojurescript {:mvn/version "1.10.597"}
-                com.wsscode/pathom        {:mvn/version "2.3.0-alpha6"}}}
+                com.wsscode/pathom        {:mvn/version "2.3.1"}
+                com.wsscode/pathom3       {:git/url "https://github.com/wilkerlucio/pathom3" :sha "07093ccb2cd22f06e74b8442dff3f7faacc5c297"}}}
 
   :dev
   {:extra-paths ["examples"]
