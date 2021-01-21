@@ -5,18 +5,18 @@
         :cljs com.wsscode.async.async-cljs) :refer [let-chan]]
     #?(:clj  [com.wsscode.pathom.viz.ws-connector.impl.http-clj :as http-clj]
        :cljs [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs])
+    [clojure.set :as set]
     [com.wsscode.async.processing :as wap]
-    [com.wsscode.pathom3.interface.async.eql :as p.a.eql]
-    [promesa.core :as p]
-    [com.wsscode.promesa.macros :refer [clet]]
-    [com.wsscode.pathom3.plugin :as p.plugin]
+    [com.wsscode.misc.coll :as coll]
+    [com.wsscode.pathom.viz.ws-connector.core :as pvc]
+    [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
     [com.wsscode.pathom3.connect.indexes :as pci]
     [com.wsscode.pathom3.connect.operation :as pco]
     [com.wsscode.pathom3.connect.runner :as pcr]
-    [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
-    [com.wsscode.misc.coll :as coll]
-    [edn-query-language.core :as eql]
-    [clojure.set :as set]))
+    [com.wsscode.pathom3.interface.async.eql :as p.a.eql]
+    [com.wsscode.pathom3.plugin :as p.plugin]
+    [com.wsscode.promesa.macros :refer [clet]]
+    [edn-query-language.core :as eql]))
 
 (defn- call-connector-impl [config parser]
   #?(:clj  (http-clj/connect-parser config parser)
@@ -24,20 +24,20 @@
 
 (defn send-message!
   [env msg]
-  (let [send-fn! (get-in env [::connector :com.wsscode.pathom.viz.ws-connector.core/send-message!])]
+  (let [send-fn! (get-in env [::connector ::pvc/send-message!])]
     (send-fn! msg)))
 
 (defn wrap-log-request [env query process]
   (let [id (wap/random-request-id)]
     (send-message! env
-      {:com.wsscode.pathom.viz.ws-connector.core/type       :com.wsscode.pathom.viz.ws-connector.core/pathom-request
-       :com.wsscode.pathom.viz.ws-connector.core/request-id id
-       :com.wsscode.pathom.viz.ws-connector.core/tx         query})
+      {::pvc/type       ::pvc/pathom-request
+       ::pvc/request-id id
+       ::pvc/tx         query})
     (clet [res (process)]
       (send-message! env
-        {:com.wsscode.pathom.viz.ws-connector.core/type       :com.wsscode.pathom.viz.ws-connector.core/pathom-request-done
-         :com.wsscode.pathom.viz.ws-connector.core/request-id id
-         :com.wsscode.pathom.viz.ws-connector.core/response   res})
+        {::pvc/type       ::pvc/pathom-request-done
+         ::pvc/request-id id
+         ::pvc/response   res})
       res)))
 
 (defn request-wrapper-plugin [wrapper]
