@@ -11,7 +11,7 @@ endif::[]
 image:https://img.shields.io/clojars/v/com.wsscode/pathom-viz-connector.svg[link=https://clojars.org/com.wsscode/pathom-viz-connector]
 image:https://cljdoc.xyz/badge/com.wsscode/pathom-viz-connector["cljdoc", link="https://cljdoc.xyz/d/com.wsscode/pathom-viz-connector/CURRENT"]
 
-This library contains the code needed to connect Pathom parsers with the Pathom Viz Electron
+This library contains the code needed to connect Pathom parsers with the link:https://github.com/wilkerlucio/pathom-viz/releases[Pathom Viz Electron]
 standalone tool.
 
 == Setup
