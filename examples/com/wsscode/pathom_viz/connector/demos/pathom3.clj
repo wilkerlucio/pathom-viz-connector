@@ -17,7 +17,7 @@
 
 (def tracked-env
   (-> env
-      (p.connector/connect-env {::pvc/parser-id ::demo})))
+      (p.connector/connect-env {::pvc/parser-id "demo"})))
 
 (comment
   (p.eql/process tracked-env
