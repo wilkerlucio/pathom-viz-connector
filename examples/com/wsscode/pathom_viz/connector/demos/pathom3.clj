@@ -1,9 +1,9 @@
 (ns com.wsscode.pathom-viz.connector.demos.pathom3
   (:require [com.wsscode.pathom.viz.ws-connector.pathom3 :as p.connector]
-            [com.wsscode.pathom.viz.ws-connector.core :as p.connector.core]
             [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
             [com.wsscode.pathom3.interface.eql :as p.eql]
             [com.wsscode.pathom3.interface.smart-map :as psm]
+            [com.wsscode.pathom.viz.ws-connector.core :as pvc]
             [com.wsscode.pathom3.connect.indexes :as pci])
   (:import (java.time LocalDate)))
 
@@ -17,7 +17,7 @@
 
 (def tracked-env
   (-> env
-      (p.connector/connect-env {::p.connector.core/parser-id ::demo})))
+      (p.connector/connect-env {::pvc/parser-id ::demo})))
 
 (comment
   (p.eql/process tracked-env

@@ -1,6 +1,5 @@
 (ns com.wsscode.pathom-viz.connector.demos.pathom2
   (:require [com.wsscode.pathom.viz.ws-connector.pathom2 :as p.connector]
-            [com.wsscode.pathom.viz.ws-connector.core :as pvc]
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc])
   (:import (java.time LocalDate)))
@@ -25,7 +24,7 @@
 (comment
   (def tracked-parser
     (p.connector/connect-parser
-      {::pvc/parser-id ::my-parser}
+      {::p.connector/parser-id ::my-parser}
       (fn [env tx]
         (parser (assoc env :extra-connector-stuff "bla") tx))))
 
