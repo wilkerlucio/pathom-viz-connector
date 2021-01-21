@@ -5,8 +5,7 @@
         :cljs com.wsscode.async.async-cljs) :refer [let-chan]]
     #?(:clj  [com.wsscode.pathom.viz.ws-connector.impl.http-clj :as http-clj]
        :cljs [com.wsscode.pathom.viz.ws-connector.impl.sente-cljs :as sente-cljs])
-    [com.wsscode.async.processing :as wap]
-    [com.wsscode.pathom.viz.ws-connector.core :as pvc]))
+    [com.wsscode.async.processing :as wap]))
 
 (>def ::host string?)
 (>def ::port pos-int?)
@@ -46,16 +45,16 @@
   are done via HTTP.
   "
   [config parser]
-  (let [{::pvc/keys [auto-trace?] :as config'} (merge {::pvc/auto-trace? true} config)
-        {::pvc/keys [send-message!]} (call-connector-impl config' parser)]
+  (let [{::keys [auto-trace?] :as config'} (merge {::auto-trace? true} config)
+        {::keys [send-message!]} (call-connector-impl config' parser)]
 
     (fn connected-parser [env tx]
       (let [id (wap/random-request-id)]
-        (send-message! {::pvc/type       ::pvc/pathom-request
-                        ::pvc/request-id id
-                        ::pvc/tx         tx})
+        (send-message! {::type       ::pathom-request
+                        ::request-id id
+                        ::tx         tx})
         (let-chan [res (parser env (cond-> tx auto-trace? (conj :com.wsscode.pathom/trace)))]
-          (send-message! {::pvc/type       ::pvc/pathom-request-done
-                          ::pvc/request-id id
-                          ::pvc/response   res})
+          (send-message! {::type       ::pathom-request-done
+                          ::request-id id
+                          ::response   res})
           res)))))

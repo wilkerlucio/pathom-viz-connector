@@ -5,7 +5,6 @@
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
-    [com.wsscode.pathom.viz.ws-connector.core :as pvc]
     [com.wsscode.promesa.bridges.core-async]
     [com.wsscode.transit :as wsst]
     [promesa.core :as p]
@@ -29,7 +28,7 @@
   [{::keys
     [send-ch]
 
-    ::pvc/keys
+    :com.wsscode.pathom.viz.ws-connector.core/keys
     [host path port on-message
      parser-id]}]
   (let [client-id
@@ -47,12 +46,15 @@
            :backoff-ms-fn  backoff-ms})]
 
     ; processing for queue to send data to the server
-    (let [{:keys [state send-fn]} sente-socket-client]
+    (let [{:keys [state send-fn] :as config} sente-socket-client]
       (go-loop [attempt 1]
         (let [open? (:open? @state)]
           (if open?
             (when-let [msg (<! send-ch)]
-              (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id)]))
+              (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id
+
+                                             :com.wsscode.pathom.viz.ws-connector.core/hidden?
+                                             (:com.wsscode.pathom.viz.ws-connector.core/hidden? config))]))
             (do
               (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
@@ -84,11 +86,11 @@
 
 (defn handle-pathom-viz-message
   [{::keys [parser send-ch]}
-   {::pvc/keys                    [type]
+   {:com.wsscode.pathom.viz.ws-connector.core/keys                    [type]
     :edn-query-language.core/keys [query]
     :as                           msg}]
   (case type
-    ::pvc/parser-request
+    :com.wsscode.pathom.viz.ws-connector.core/parser-request
     (p/let [res (parser {} query)]
       (send-message! send-ch (wap/reply-message msg res)))
 
@@ -100,12 +102,12 @@
         config' (assoc config ::parser parser ::send-ch send-ch)]
     (connect-ws!
       (merge
-        {::pvc/on-message
+        {:com.wsscode.pathom.viz.ws-connector.core/on-message
          (fn [_ msg]
            (handle-pathom-viz-message config' msg))
 
          ::send-ch
          send-ch}
         config))
-    {::pvc/send-message!
+    {:com.wsscode.pathom.viz.ws-connector.core/send-message!
      #(send-message! send-ch %)}))
