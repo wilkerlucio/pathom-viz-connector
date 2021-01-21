@@ -5,12 +5,13 @@
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
-    [com.wsscode.transit :as wsst]
+    [com.wsscode.pathom.viz.ws-connector.core :as pvc]
     [com.wsscode.promesa.bridges.core-async]
+    [com.wsscode.transit :as wsst]
+    [promesa.core :as p]
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
-    [taoensso.sente.packers.transit :as st]
-    [promesa.core :as p]))
+    [taoensso.sente.packers.transit :as st]))
 
 (defn make-packer
   "Returns a json packer for use with sente."
@@ -28,7 +29,7 @@
   [{::keys
     [send-ch]
 
-    :com.wsscode.pathom.viz.ws-connector.core/keys
+    ::pvc/keys
     [host path port on-message
      parser-id]}]
   (let [client-id
@@ -83,11 +84,11 @@
 
 (defn handle-pathom-viz-message
   [{::keys [parser send-ch]}
-   {:com.wsscode.pathom.viz.ws-connector.core/keys [type]
-    :edn-query-language.core/keys                  [query]
-    :as                                            msg}]
+   {::pvc/keys                    [type]
+    :edn-query-language.core/keys [query]
+    :as                           msg}]
   (case type
-    :com.wsscode.pathom.viz.ws-connector.core/parser-request
+    ::pvc/parser-request
     (p/let [res (parser {} query)]
       (send-message! send-ch (wap/reply-message msg res)))
 
@@ -99,12 +100,12 @@
         config' (assoc config ::parser parser ::send-ch send-ch)]
     (connect-ws!
       (merge
-        {:com.wsscode.pathom.viz.ws-connector.core/on-message
+        {::pvc/on-message
          (fn [_ msg]
            (handle-pathom-viz-message config' msg))
 
          ::send-ch
          send-ch}
         config))
-    {:com.wsscode.pathom.viz.ws-connector.core/send-message!
+    {::pvc/send-message!
      #(send-message! send-ch %)}))

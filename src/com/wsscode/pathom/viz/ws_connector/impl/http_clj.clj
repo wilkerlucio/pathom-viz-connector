@@ -4,6 +4,7 @@
             [com.wsscode.async.processing :as wap]
             [com.wsscode.async.async-clj :refer [<?!maybe]]
             [com.wsscode.transit :as t]
+            [com.wsscode.pathom.viz.ws-connector.core :as pvc]
             [com.wsscode.promesa.bridges.core-async]
             [promesa.core :as p])
   (:import (java.util UUID)))
@@ -29,15 +30,15 @@
 
 (defn handler
   [request]
-  (let [{:com.wsscode.pathom.viz.ws-connector.core/keys [type]
-         :com.wsscode.node-ws-server/keys               [client-id]
-         :edn-query-language.core/keys                  [query]
-         :as                                            msg}
+  (let [{::pvc/keys                       [type]
+         :com.wsscode.node-ws-server/keys [client-id]
+         :edn-query-language.core/keys    [query]
+         :as                              msg}
         (-> request :body slurp t/read)]
     (if-not (wap/capture-response! msg)
       (if-let [parser (get @parsers* client-id)]
         (case type
-          :com.wsscode.pathom.viz.ws-connector.core/parser-request
+          ::pvc/parser-request
           @(p/let [res (parser {} query)]
              (send-message! request (wap/reply-message msg res)))
 
@@ -45,8 +46,8 @@
 
 (defn send-connect-message! [config]
   (send-message! config
-    {:com.wsscode.pathom.viz.ws-connector.core/type
-     :com.wsscode.pathom.viz.ws-connector.core/ping}))
+    {::pvc/type
+     ::pvc/ping}))
 
 (defn stop! []
   (when-let [{::keys [server]} @server*]
@@ -54,7 +55,7 @@
     (reset! server* nil)))
 
 (defn start-http-server! [config parser]
-  (let [client-id (or (:com.wsscode.pathom.viz.ws-connector.core/parser-id config)
+  (let [client-id (or (::pvc/parser-id config)
                       (UUID/randomUUID))]
     (swap! parsers* assoc client-id parser)
     (if @server*
@@ -73,11 +74,11 @@
 (defn connect-parser [config parser]
   (let [config' (start-http-server! config parser)]
     (send-connect-message! config')
-    {:com.wsscode.pathom.viz.ws-connector.core/send-message!
+    {::pvc/send-message!
      #(send-message! config' %)}))
 
 (comment
-  (start-http-server! {:com.wsscode.pathom.viz.ws-connector.core/parser-id "testing"}
+  (start-http-server! {::pvc/parser-id "testing"}
     (fn [_ _] {:hello "world"}))
 
   (def s (server/run-server handler {:port 13003}))
