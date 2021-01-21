@@ -1,5 +1,5 @@
-(ns com.wsscode.pathom-viz.connector.demos.clj-parser
-  (:require [com.wsscode.pathom.viz.ws-connector.core :as p.connector]
+(ns com.wsscode.pathom-viz.connector.demos.pathom2
+  (:require [com.wsscode.pathom.viz.ws-connector.pathom2 :as p.connector]
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc])
   (:import (java.time LocalDate)))

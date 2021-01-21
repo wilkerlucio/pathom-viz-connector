@@ -3,7 +3,9 @@
             [org.httpkit.server :as server]
             [com.wsscode.async.processing :as wap]
             [com.wsscode.async.async-clj :refer [<?!maybe]]
-            [com.wsscode.transit :as t])
+            [com.wsscode.transit :as t]
+            [com.wsscode.promesa.bridges.core-async]
+            [promesa.core :as p])
   (:import (java.util UUID)))
 
 (defonce server* (atom nil))
@@ -36,8 +38,8 @@
       (if-let [parser (get @parsers* client-id)]
         (case type
           :com.wsscode.pathom.viz.ws-connector.core/parser-request
-          (let [res (<?!maybe (parser {} query))]
-            (send-message! request (wap/reply-message msg res)))
+          @(p/let [res (parser {} query)]
+             (send-message! request (wap/reply-message msg res)))
 
           (println "Unknown message received" msg))))))
 

@@ -32,7 +32,7 @@ When using from Clojurescript, you need to have the `websockets` dependency:
 npm i websocket
 ----
 
-== Connecting parsers
+== Connecting parsers (Pathom 2)
 
 To connect the parser with the electron, follow the example:
 
@@ -68,3 +68,65 @@ To connect the parser with the electron, follow the example:
 
 `connect-parser` returns a parser that will be have all requests logged into the electron
 app.
+
+== Connecting env (Pathom 3)
+
+For Pathom 3 you must use the namespace `com.wsscode.pathom.viz.ws-connector.pathom3`.
+
+The setup is similar, you call a function in your env, and from that point all you
+can communicate with it and track the requests made:
+
+[source,clojure]
+----
+(ns com.wsscode.pathom-viz.connector.demos.pathom3
+  (:require [com.wsscode.pathom.viz.ws-connector.pathom3 :as p.connector]
+            [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
+            [com.wsscode.pathom3.interface.eql :as p.eql]
+            [com.wsscode.pathom3.interface.smart-map :as psm]
+            [com.wsscode.pathom.viz.ws-connector.core :as pvc]
+            [com.wsscode.pathom3.connect.indexes :as pci])
+  (:import (java.time LocalDate)))
+
+(def registry
+  [(pbir/constantly-resolver :pi Math/PI)
+   (pbir/constantly-resolver :bad (LocalDate/now))
+   (pbir/single-attr-resolver :pi :tau #(* 2 %))])
+
+(def env
+  (pci/register registry))
+
+(def tracked-env
+  (-> env
+      (p.connector/connect-env {::pvc/parser-id "demo"})))
+
+(comment
+  (p.eql/process tracked-env
+    [:tau]))
+----
+
+== Render Graph on Logs (Pathom 3)
+
+To log graphs in the Pathom Viz you can use the helper from `com.wsscode.pathom.viz.ws-connector.pathom3.log-view`
+
+Here is one example:
+
+[source,clojure]
+----
+(ns com.wsscode.pathom-viz.connector.demos.pathom3-log-graph
+  (:require [com.wsscode.pathom.viz.ws-connector.pathom3.log-view :as log-v]
+            [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
+            [com.wsscode.pathom3.connect.indexes :as pci]
+            [com.wsscode.pathom3.interface.eql :as p.eql]))
+
+(def registry
+  [(pbir/constantly-resolver :pi Math/PI)
+   (pbir/single-attr-resolver :pi :tau #(* 2 %))])
+
+(def env
+  (pci/register registry))
+
+(comment
+  ; logs the graph from the root
+  (log-v/log-execution-graph
+    (p.eql/process env [:tau])))
+----

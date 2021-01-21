@@ -2,10 +2,13 @@
   (:require
     [cljs.core.async :as async :refer [>! <! go go-loop put!]]
     [clojure.pprint :refer [pprint]]
+    [cognitect.transit :as t]
     [com.fulcrologic.guardrails.core :refer [>def >defn >fdef => | <- ?]]
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
+    [com.wsscode.promesa.bridges.core-async]
     [com.wsscode.transit :as wsst]
+    [promesa.core :as p]
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
     [taoensso.sente.packers.transit :as st]))
@@ -14,7 +17,8 @@
   "Returns a json packer for use with sente."
   [{:keys [read write]}]
   (st/->TransitPacker :json
-    {:handlers (merge {"default" (wsst/->DefaultHandler)} write)}
+    {:handlers  (merge {"default" (wsst/->DefaultHandler)} write)
+     :transform t/write-meta}
     {:handlers (or read {})}))
 
 (goog-define DEFAULT_HOST "localhost")
@@ -44,12 +48,15 @@
            :backoff-ms-fn  backoff-ms})]
 
     ; processing for queue to send data to the server
-    (let [{:keys [state send-fn]} sente-socket-client]
+    (let [{:keys [state send-fn] :as config} sente-socket-client]
       (go-loop [attempt 1]
         (let [open? (:open? @state)]
           (if open?
             (when-let [msg (<! send-ch)]
-              (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id)]))
+              (send-fn [::message (assoc msg :com.wsscode.node-ws-server/client-id client-id
+
+                                             :com.wsscode.pathom.viz.ws-connector.core/hidden?
+                                             (:com.wsscode.pathom.viz.ws-connector.core/hidden? config))]))
             (do
               (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
@@ -81,12 +88,12 @@
 
 (defn handle-pathom-viz-message
   [{::keys [parser send-ch]}
-   {:com.wsscode.pathom.viz.ws-connector.core/keys [type]
-    :edn-query-language.core/keys                  [query]
-    :as                                            msg}]
+   {:com.wsscode.pathom.viz.ws-connector.core/keys                    [type]
+    :edn-query-language.core/keys [query]
+    :as                           msg}]
   (case type
     :com.wsscode.pathom.viz.ws-connector.core/parser-request
-    (let-chan [res (parser {} query)]
+    (p/let [res (parser {} query)]
       (send-message! send-ch (wap/reply-message msg res)))
 
     (js/console.warn "Unknown message received" msg)))
