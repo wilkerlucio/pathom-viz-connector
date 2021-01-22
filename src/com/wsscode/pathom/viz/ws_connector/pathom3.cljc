@@ -66,13 +66,14 @@
                     ::pci/index-mutations ::pci/autocomplete-ignore
                     ::pci/index-attributes]))
 
-(pco/defresolver indexes-resolver-wrapped [env indexes]
+(pco/defresolver indexes-resolver-wrapped [indexes]
   {::pco/input  [(pco/? :com.wsscode.pathom.connect/index-io)
                  (pco/? :com.wsscode.pathom.connect/index-oir)
                  (pco/? :com.wsscode.pathom.connect/index-resolvers)
                  (pco/? :com.wsscode.pathom.connect/index-mutations)
                  (pco/? :com.wsscode.pathom.connect/index-attributes)
-                 (pco/? :com.wsscode.pathom.connect/autocomplete-ignore)]
+                 (pco/? :com.wsscode.pathom.connect/autocomplete-ignore)
+                 (pco/? :com.wsscode.pathom.connect/idents)]
    ::pco/output [{:com.wsscode.pathom.connect/indexes
                   [:com.wsscode.pathom.connect/index-io
                    :com.wsscode.pathom.connect/index-oir
@@ -82,10 +83,31 @@
                    :com.wsscode.pathom.connect/autocomplete-ignore]}]}
   {:com.wsscode.pathom.connect/indexes indexes})
 
+(defn single-entry-attributes [{::pci/keys [index-resolvers] :as env}]
+  (let [root-available (pci/reachable-attributes env {})]
+    (into #{}
+          (comp (map pco/operation-config)
+                (keep (fn [{::pco/keys [requires]}]
+                        (let [missing-inputs (set/difference (set (keys requires)) root-available)]
+                          (cond
+                            (= 1 (count requires))
+                            (first (keys requires))
+
+                            (= 1 (count missing-inputs))
+                            (first missing-inputs))))))
+          (vals index-resolvers))))
+
+(pco/defresolver indexes-idents [indexes]
+  {::pco/input  [::pci/index-resolvers ::pci/index-io]
+   ::pco/output [:com.wsscode.pathom.connect/idents]}
+  {:com.wsscode.pathom.connect/idents
+   (single-entry-attributes indexes)})
+
 (def connector-indexes
   (pci/register
     [indexes-resolver
      indexes-resolver-wrapped
+     indexes-idents
 
      (pbir/single-attr-resolver
        ::pci/index-oir
@@ -106,17 +128,22 @@
        ::pci/index-resolvers
        :com.wsscode.pathom.connect/index-resolvers
        (fn [resolvers]
-         (coll/map-vals (comp #(set/rename-keys % {::pco/op-name
-                                                   :com.wsscode.pathom.connect/sym
+         (coll/map-vals (comp #(-> %
+                                   (set/rename-keys {::pco/op-name
+                                                     :com.wsscode.pathom.connect/sym
 
-                                                   ::pco/input
-                                                   :com.wsscode.pathom.connect/input
+                                                     ::pco/input
+                                                     :com.wsscode.pathom.connect/input
 
-                                                   ::pco/output
-                                                   :com.wsscode.pathom.connect/output
+                                                     ::pco/output
+                                                     :com.wsscode.pathom.connect/output
 
-                                                   ::pco/provides
-                                                   :com.wsscode.pathom.connect/provides}) pco/operation-config) resolvers)))
+                                                     ::pco/provides
+                                                     :com.wsscode.pathom.connect/provides})
+                                   (coll/update-if :com.wsscode.pathom.connect/input
+                                     (fn [i]
+                                       (into #{} (keys (::pco/requires %))))))
+                              pco/operation-config) resolvers)))
 
      (pbir/single-attr-resolver
        ::pci/index-mutations
@@ -132,7 +159,8 @@
                                                    :com.wsscode.pathom.connect/output
 
                                                    ::pco/provides
-                                                   :com.wsscode.pathom.connect/provides}) pco/operation-config) mutations)))
+                                                   :com.wsscode.pathom.connect/provides})
+                              pco/operation-config) mutations)))
 
      (pbir/single-attr-resolver
        ::pci/index-attributes

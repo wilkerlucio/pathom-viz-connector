@@ -23,6 +23,12 @@
   (p.eql/process tracked-env
     [:tau])
 
+  (p.eql/process tracked-env
+    [:com.wsscode.pathom.connect/index-resolvers])
+
+  (p.eql/process tracked-env
+    [:com.wsscode.pathom.connect/idents])
+
   (->> (p.eql/process tracked-env
          [:com.wsscode.pathom.connect/indexes])
        :com.wsscode.pathom.connect/indexes
