@@ -1,11 +1,15 @@
 (ns com.wsscode.pathom-viz.connector.demos.pathom2
-  (:require [com.wsscode.pathom.viz.ws-connector.pathom2 :as p.connector]
+  (:require [com.wsscode.pathom.viz.ws-connector.core :as p.connector]
             [com.wsscode.pathom.core :as p]
             [com.wsscode.pathom.connect :as pc])
   (:import (java.time LocalDate)))
 
+(pc/defresolver nested [_]
+  {:output {:nested {:value "true"}}})
+
 (def registry
-  [(pc/constantly-resolver :pi Math/PI)
+  [nested
+   (pc/constantly-resolver :pi Math/PI)
    (pc/constantly-resolver :bad (LocalDate/now))
    (pc/single-attr-resolver :pi :tau #(* 2 %))])
 
