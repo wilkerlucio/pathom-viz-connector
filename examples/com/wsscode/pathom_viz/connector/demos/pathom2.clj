@@ -32,4 +32,6 @@
       (fn [env tx]
         (parser (assoc env :extra-connector-stuff "bla") tx))))
 
+  (parser {} [:tau :com.wsscode.pathom/trace])
+
   (tracked-parser {} [:works-here?]))
