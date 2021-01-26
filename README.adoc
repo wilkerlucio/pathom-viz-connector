@@ -79,28 +79,29 @@ can communicate with it and track the requests made:
 [source,clojure]
 ----
 (ns com.wsscode.pathom-viz.connector.demos.pathom3
-  (:require [com.wsscode.pathom.viz.ws-connector.pathom3 :as p.connector]
+  (:require [com.wsscode.pathom.viz.ws-connector.core :as pvc]
+            [com.wsscode.pathom.viz.ws-connector.pathom3 :as p.connector]
             [com.wsscode.pathom3.connect.built-in.resolvers :as pbir]
-            [com.wsscode.pathom3.interface.eql :as p.eql]
-            [com.wsscode.pathom3.interface.smart-map :as psm]
-            [com.wsscode.pathom.viz.ws-connector.core :as pvc]
-            [com.wsscode.pathom3.connect.indexes :as pci])
-  (:import (java.time LocalDate)))
+            [com.wsscode.pathom3.connect.indexes :as pci]
+            [com.wsscode.pathom3.interface.eql :as p.eql]))
+
+; you can use goog.defines on ClojureScript or env vars in Clojure
+; the important part is to have a flag to decide when to connect the parser
+(def CONNECT_PARSER? true)
 
 (def registry
   [(pbir/constantly-resolver :pi Math/PI)
-   (pbir/constantly-resolver :bad (LocalDate/now))
    (pbir/single-attr-resolver :pi :tau #(* 2 %))])
 
 (def env
-  (pci/register registry))
-
-(def tracked-env
-  (-> env
-      (p.connector/connect-env {::pvc/parser-id "demo"})))
+  (cond-> (pci/register registry)
+    CONNECT_PARSER?
+    ; give your environment a unique parser-id, this will ensure reconnects work as
+    ; expected
+    (p.connector/connect-env {::pvc/parser-id ::my-parser})))
 
 (comment
-  (p.eql/process tracked-env
+  (p.eql/process env
     [:tau]))
 ----
 

@@ -4,7 +4,7 @@
   <groupId>com.wsscode</groupId>
   <artifactId>pathom-viz-connector</artifactId>
   <packaging>jar</packaging>
-  <version>2021.01.22</version>
+  <version>2021.01.25</version>
   <name>pathom-viz-connector</name>
   <description>Connector tools to use the Pathom Viz Application.</description>
   <url>https://github.com/wilkerlucio/pathom-viz-connector</url>
@@ -18,7 +18,7 @@
     <url>https://github.com/wilkerlucio/pathom-viz-connector</url>
     <connection>scm:git:git://github.com/wilkerlucio/pathom-viz-connector.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/wilkerlucio/pathom-viz-connector.git</developerConnection>
-    <tag>f7f321585093c20d5c87398fb60ba92d5e49e4db</tag>
+    <tag>d3b294f8b8178556aaafa772b5115c1d4f8ac1c2</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
