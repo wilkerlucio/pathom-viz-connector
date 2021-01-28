@@ -16,7 +16,8 @@
     [com.wsscode.pathom3.interface.async.eql :as p.a.eql]
     [com.wsscode.pathom3.plugin :as p.plugin]
     [com.wsscode.promesa.macros :refer [clet]]
-    [edn-query-language.core :as eql]))
+    [edn-query-language.core :as eql]
+    [com.wsscode.pathom3.interface.eql :as p.eql]))
 
 (defn- call-connector-impl [config parser]
   #?(:clj  (http-clj/connect-parser config parser)
@@ -203,10 +204,14 @@
   In Clojurescript this will connect to the app using websockets. In Clojure the comes
   are done via HTTP.
   "
-  [env config]
+  [env {::keys [async?]
+        :or    {async? true}
+        :as    config}]
   (let [inside-env (pci/register env connector-indexes)
         parser     (fn [env' tx]
-                     (p.a.eql/process (merge inside-env env') tx))
+                     (if async?
+                       (p.a.eql/process (merge inside-env env') tx)
+                       (p.eql/process (merge inside-env env') tx)))
         env        (assoc inside-env ::connector (call-connector-impl config parser))]
 
     (-> env
