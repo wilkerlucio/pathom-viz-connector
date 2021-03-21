@@ -17,7 +17,8 @@
     [com.wsscode.pathom3.plugin :as p.plugin]
     [com.wsscode.promesa.macros :refer [clet]]
     [edn-query-language.core :as eql]
-    [com.wsscode.pathom3.interface.eql :as p.eql]))
+    [com.wsscode.pathom3.interface.eql :as p.eql]
+    [com.wsscode.pathom3.connect.planner :as pcp]))
 
 (defn- call-connector-impl [config parser]
   #?(:clj  (http-clj/connect-parser config parser)
@@ -84,6 +85,14 @@
                    :com.wsscode.pathom.connect/autocomplete-ignore]}]}
   {:com.wsscode.pathom.connect/indexes indexes})
 
+(pco/defmutation request-snapshots
+  [env {::pcp/keys [source-ast available-data]}]
+  {:snapshots
+   (pcp/compute-plan-snapshots
+     (assoc env
+       ::pcp/available-data available-data
+       :edn-query-language.ast/node source-ast))})
+
 (defn single-entry-attributes [{::pci/keys [index-resolvers] :as env}]
   (let [root-available (pci/reachable-attributes env {})]
     (into #{}
@@ -109,6 +118,7 @@
     [indexes-resolver
      indexes-resolver-wrapped
      indexes-idents
+     request-snapshots
 
      (pbir/single-attr-resolver
        ::pci/index-oir
