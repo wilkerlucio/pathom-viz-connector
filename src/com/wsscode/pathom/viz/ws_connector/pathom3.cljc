@@ -239,3 +239,9 @@
   (let [{::pvc/keys [send-message!]} (logs-connection)]
     (send-message! {::pvc/type  ::pvc/log-entry
                     ::pvc/entry msg})))
+
+(comment
+  ; for static analysis
+  :pathom.viz.log.type/plan-snapshots
+  :pathom.viz.log.type/plan-view
+  :pathom.viz.log.type/trace)
