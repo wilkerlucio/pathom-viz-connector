@@ -217,7 +217,8 @@
   [env {::keys [async?]
         :or    {async? true}
         :as    config}]
-  (let [inside-env (pci/register env connector-indexes)
+  (let [config     (if (string? config) {::pvc/parser-id config} config)
+        inside-env (pci/register env connector-indexes)
         parser     (fn [env' tx]
                      (if async?
                        (p.a.eql/process (merge inside-env env') tx)
