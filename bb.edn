@@ -1,0 +1,7 @@
+{:tasks
+ {release
+  {:doc  "Release to Clojars"
+   :task (do
+           (shell "lein vcs tag v")
+           (shell "git push --follow-tags")
+           (shell "lein deploy clojars"))}}}
