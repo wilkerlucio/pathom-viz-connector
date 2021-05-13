@@ -5,7 +5,8 @@
             [com.wsscode.async.async-clj :refer [<?!maybe]]
             [com.wsscode.transit :as t]
             [com.wsscode.promesa.bridges.core-async]
-            [promesa.core :as p])
+            [promesa.core :as p]
+            [taoensso.timbre :refer [trace debug info warn error fatal report spy]])
   (:import (java.util UUID)))
 
 (defonce server* (atom nil))
@@ -41,7 +42,7 @@
           @(p/let [res (parser {} query)]
              (send-message! request (wap/reply-message msg res)))
 
-          (println "Unknown message received" msg))))))
+          (warn "Unknown message received" msg))))))
 
 (defn send-connect-message! [config]
   (send-message! config

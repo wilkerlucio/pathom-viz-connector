@@ -11,7 +11,8 @@
     [promesa.core :as p]
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
-    [taoensso.sente.packers.transit :as st]))
+    [taoensso.sente.packers.transit :as st]
+    [taoensso.timbre :refer [trace debug info warn error fatal report spy]]))
 
 (defn make-packer
   "Returns a json packer for use with sente."
@@ -58,7 +59,7 @@
                                              :com.wsscode.pathom.viz.ws-connector.core/hidden?
                                              (:com.wsscode.pathom.viz.ws-connector.core/hidden? config))]))
             (do
-              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
+              (info (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
           (recur (if open? 1 (inc attempt))))))
 
@@ -71,13 +72,13 @@
                   (if (= id :com.wsscode.node-ws-server/message)
                     (on-message {} ?data))))
             (do
-              (js/console.log (str "Waiting for channel to be ready") (backoff-ms attempt))
+              (info (str "Waiting for channel to be ready") (backoff-ms attempt))
               (async/<! (async/timeout (backoff-ms attempt)))))
           (recur (if open? 1 (inc attempt))))))))
 
 (defn connect-ws!
   [config]
-  (js/console.log "Connecting to websocket" config)
+  (info "Connecting to websocket" config)
   (start-ws-messaging! config))
 
 ;;;;
@@ -96,7 +97,7 @@
     (p/let [res (parser {} query)]
       (send-message! send-ch (wap/reply-message msg res)))
 
-    (js/console.warn "Unknown message received" msg)))
+    (warn "Unknown message received" msg)))
 
 (defn connect-parser
   [config parser]
