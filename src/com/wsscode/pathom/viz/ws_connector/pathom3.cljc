@@ -94,11 +94,10 @@
         :as    config}]
   (let [config     (if (string? config) {::pvc/parser-id config} config)
         inside-env (pci/register env request-snapshots)
-        parser     (fn [env' tx]
-                     (if async?
-                       (p.a.eql/process (merge inside-env env') tx)
-                       (p.eql/process (merge inside-env env') tx)))
-        env        (assoc inside-env ::connector (call-connector-impl config parser))]
+        interface  (if async?
+                     (p.a.eql/boundary-interface inside-env)
+                     (p.eql/boundary-interface inside-env))
+        env        (assoc inside-env ::connector (call-connector-impl config interface))]
 
     (-> env
         (p.plugin/register track-requests))))
