@@ -1,6 +1,7 @@
 (ns com.wsscode.transit
   (:refer-clojure :exclude [read write])
   (:require [cognitect.transit :as t]
+            [com.wsscode.pathom3.connect.operation.transit :as pcot]
     #?(:cljs [goog.object :as gobj]))
   #?(:clj (:import (java.io ByteArrayOutputStream ByteArrayInputStream OutputStream)
                    (com.cognitect.transit WriteHandler TransitFactory)
@@ -20,11 +21,11 @@
 (defn read [s]
   #?(:clj
      (let [in     (ByteArrayInputStream. (.getBytes s))
-           reader (t/reader in :json)]
+           reader (t/reader in :json {:handlers pcot/read-handlers})]
        (t/read reader))
 
      :cljs
-     (let [reader (t/reader :json)]
+     (let [reader (t/reader :json {:handlers pcot/read-handlers})]
        (t/read reader s))))
 
 #?(:cljs
@@ -57,12 +58,13 @@
   #?(:clj
      (let [out    (ByteArrayOutputStream. 4096)
            writer (writer out :json {:default-handler (DefaultHandler.)
+                                     :handlers        pcot/write-handlers
                                      :transform       t/write-meta})]
        (t/write writer x)
        (.toString out))
 
      :cljs
-     (let [writer (t/writer :json {:handlers  cljs-write-handlers
+     (let [writer (t/writer :json {:handlers  (merge cljs-write-handlers pcot/write-handlers)
                                    :transform t/write-meta})]
        (t/write writer x))))
 
