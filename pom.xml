@@ -18,7 +18,7 @@
     <url>https://github.com/wilkerlucio/pathom-viz-connector</url>
     <connection>scm:git:git://github.com/wilkerlucio/pathom-viz-connector.git</connection>
     <developerConnection>scm:git:ssh://git@github.com/wilkerlucio/pathom-viz-connector.git</developerConnection>
-    <tag>644edf60962a097aff63438b2182518ebeefae26</tag>
+    <tag>a6593638c4dba42911e36b63b8f9d0552f8887f6</tag>
   </scm>
   <build>
     <sourceDirectory>src</sourceDirectory>
