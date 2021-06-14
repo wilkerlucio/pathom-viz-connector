@@ -12,7 +12,8 @@
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
     [taoensso.sente.packers.transit :as st]
-    [taoensso.timbre :refer [trace debug info warn error fatal report spy]]))
+    [taoensso.timbre :refer [trace debug info warn error fatal report spy]]
+    [com.wsscode.pathom3.connect.operation.transit :as pcot]))
 
 (defn make-packer
   "Returns a json packer for use with sente."
@@ -43,7 +44,8 @@
            :host           (or host DEFAULT_HOST)
            :port           (or port DEFAULT_PORT)
            :protocol       :http
-           :packer         (make-packer {})
+           :packer         (make-packer {:read  pcot/read-handlers
+                                         :write pcot/write-handlers})
            :client-uuid    client-id
            :wrap-recv-evs? false
            :backoff-ms-fn  backoff-ms})]
