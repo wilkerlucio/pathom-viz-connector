@@ -2,8 +2,7 @@
  ["src"]
 
  :deps
- {com.wsscode/transito        {}
-  com.fulcrologic/guardrails  {:mvn/version "0.0.12"}
+ {com.fulcrologic/guardrails  {:mvn/version "0.0.12"}
   com.taoensso/sente          {:mvn/version "1.16.0"}
   com.taoensso/timbre         {:mvn/version "5.1.2"}
   com.wsscode/async           {:mvn/version "1.0.11"}
