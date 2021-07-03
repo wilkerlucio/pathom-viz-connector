@@ -116,7 +116,11 @@
                                 :com.wsscode.pathom.connect/attr-output-in
                                 :com.wsscode.pathom3.connect.indexes/attr-reach-via
                                 :com.wsscode.pathom.connect/attr-reach-via})
-           idx-attrs)))]))
+           idx-attrs)))
+
+     (pbir/alias-resolver
+       ::pci/transient-attrs
+       :com.wsscode.pathom.connect/autocomplete-ignore)]))
 
 (defn ensure-pathom2-indexes [indexes]
   (let [indexes (or (::pci/indexes indexes) indexes)]
