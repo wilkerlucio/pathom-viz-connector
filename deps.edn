@@ -6,15 +6,16 @@
   com.taoensso/sente          {:mvn/version "1.16.0"}
   com.taoensso/timbre         {:mvn/version "5.1.2"}
   com.wsscode/async           {:mvn/version "1.0.11"}
-  com.wsscode/pathom3         {:git/url "https://github.com/wilkerlucio/pathom3" :sha "dda548b792cdf501805de02018b2330ed900f152"}
   com.wsscode/promesa-bridges {:mvn/version "2021.01.20"}
+  com.wsscode/transito        {:mvn/version "2021.07.04"}
   http-kit                    {:mvn/version "2.3.0"}}
 
  :aliases
  {:provided
   {:extra-deps {org.clojure/clojure       {:mvn/version "1.10.1"}
                 org.clojure/clojurescript {:mvn/version "1.10.597"}
-                com.wsscode/pathom        {:mvn/version "2.3.1"}}}
+                com.wsscode/pathom        {:mvn/version "2.3.1"}
+                com.wsscode/pathom3       {:git/url "https://github.com/wilkerlucio/pathom3" :sha "dda548b792cdf501805de02018b2330ed900f152"}}}
 
   :dev
   {:extra-paths ["examples"]

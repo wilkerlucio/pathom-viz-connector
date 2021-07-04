@@ -7,19 +7,18 @@
     [com.wsscode.async.async-cljs :refer [let-chan]]
     [com.wsscode.async.processing :as wap]
     [com.wsscode.promesa.bridges.core-async]
-    [com.wsscode.transit :as wsst]
+    [com.wsscode.transito :as transito]
     [promesa.core :as p]
     [taoensso.encore :as enc]
     [taoensso.sente :as sente]
     [taoensso.sente.packers.transit :as st]
-    [taoensso.timbre :refer [trace debug info warn error fatal report spy]]
-    [com.wsscode.pathom3.connect.operation.transit :as pcot]))
+    [taoensso.timbre :refer [trace debug info warn error fatal report spy]]))
 
 (defn make-packer
   "Returns a json packer for use with sente."
   [{:keys [read write]}]
   (st/->TransitPacker :json
-    {:handlers  (merge {"default" (wsst/->DefaultHandler)} write)
+    {:handlers  (merge {"default" transito/unknown-default-handler} write)
      :transform t/write-meta}
     {:handlers (or read {})}))
 
@@ -31,6 +30,9 @@
 (defn start-ws-messaging!
   [{::keys
     [send-ch]
+
+    :transit/keys
+    [read-handlers write-handlers]
 
     :com.wsscode.pathom.viz.ws-connector.core/keys
     [host path port on-message
@@ -44,8 +46,8 @@
            :host           (or host DEFAULT_HOST)
            :port           (or port DEFAULT_PORT)
            :protocol       :http
-           :packer         (make-packer {:read  pcot/read-handlers
-                                         :write pcot/write-handlers})
+           :packer         (make-packer {:read  read-handlers
+                                         :write write-handlers})
            :client-uuid    client-id
            :wrap-recv-evs? false
            :backoff-ms-fn  backoff-ms})]

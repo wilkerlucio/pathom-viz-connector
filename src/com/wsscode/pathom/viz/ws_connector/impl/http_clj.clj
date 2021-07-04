@@ -3,7 +3,7 @@
             [org.httpkit.server :as server]
             [com.wsscode.async.processing :as wap]
             [com.wsscode.async.async-clj :refer [<?!maybe]]
-            [com.wsscode.transit :as t]
+            [com.wsscode.transito :as t]
             [com.wsscode.promesa.bridges.core-async]
             [promesa.core :as p]
             [taoensso.timbre :refer [trace debug info warn error fatal report spy]])
@@ -15,6 +15,12 @@
 (defn random-port []
   (+ 10000 (rand-int 5000)))
 
+(defn transit-read [x {:transit/keys [read-handlers]}]
+  (t/read-str x {:handlers (or read-handlers {})}))
+
+(defn transit-write [x {:transit/keys [write-handlers]}]
+  (t/write-str x {:handlers (or write-handlers {})}))
+
 (defn send-message! [config msg]
   (client/post "http://localhost:8240/request"
     {:headers {"Content-Type" "application/transit+json"}
@@ -25,7 +31,7 @@
 
                     ::local-http-address
                     (::local-http-address config))
-                  t/write)})
+                  (transit-write config))})
   (wap/await! msg))
 
 (defn handler
@@ -34,7 +40,7 @@
          :com.wsscode.node-ws-server/keys               [client-id]
          :edn-query-language.core/keys                  [query]
          :as                                            msg}
-        (-> request :body slurp t/read)]
+        (-> request :body slurp (transit-read request))]
     (if-not (wap/capture-response! msg)
       (if-let [parser (get @parsers* client-id)]
         (case type

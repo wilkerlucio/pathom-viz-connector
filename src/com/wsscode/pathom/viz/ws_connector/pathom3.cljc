@@ -13,6 +13,7 @@
     [com.wsscode.pathom3.interface.async.eql :as p.a.eql]
     [com.wsscode.pathom3.plugin :as p.plugin]
     [com.wsscode.promesa.macros :refer [clet]]
+    [com.wsscode.pathom3.connect.operation.transit :as pcot]
     [edn-query-language.core :as eql]
     [com.wsscode.pathom3.interface.eql :as p.eql]
     [com.wsscode.pathom3.connect.planner :as pcp]))
@@ -93,6 +94,9 @@
         :or    {async? true}
         :as    config}]
   (let [config     (if (string? config) {::pvc/parser-id config} config)
+        config     (assoc config
+                     :transit/read-handlers pcot/read-handlers
+                     :transit/write-handlers pcot/write-handlers)
         inside-env (pci/register env request-snapshots)
         interface  (if async?
                      (p.a.eql/boundary-interface inside-env)
