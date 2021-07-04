@@ -48,6 +48,8 @@
     [indexes-resolver-wrapped
      indexes-idents
 
+     (pbir/constantly-resolver :pathom.viz/support-boundary-interface? true)
+
      (pbir/single-attr-resolver
        ::pci/index-oir
        :com.wsscode.pathom.connect/index-oir
