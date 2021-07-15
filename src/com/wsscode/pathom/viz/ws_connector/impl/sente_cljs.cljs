@@ -98,8 +98,13 @@
     :as                           msg}]
   (case type
     :com.wsscode.pathom.viz.ws-connector.core/parser-request
-    (p/let [res (parser {} query)]
-      (send-message! send-ch (wap/reply-message msg res)))
+    (-> (p/let [res (parser {} query)]
+          (send-message! send-ch (wap/reply-message msg res)))
+        (p/catch
+          (fn [err]
+            (send-message! send-ch
+              (wap/reply-message msg
+                {:pathom.connector/request-exception err})))))
 
     (warn "Unknown message received" msg)))
 

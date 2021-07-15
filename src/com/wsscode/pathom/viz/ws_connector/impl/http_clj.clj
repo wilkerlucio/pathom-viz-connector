@@ -45,8 +45,13 @@
       (if-let [parser (get @parsers* client-id)]
         (case type
           :com.wsscode.pathom.viz.ws-connector.core/parser-request
-          @(p/let [res (parser {} query)]
-             (send-message! request (wap/reply-message msg res)))
+          (try
+            @(p/let [res (parser {} query)]
+               (send-message! request (wap/reply-message msg res)))
+            (catch Throwable err
+              (send-message! request
+                (wap/reply-message msg
+                  {:pathom.connector/request-exception err}))))
 
           (warn "Unknown message received" msg))))))
 

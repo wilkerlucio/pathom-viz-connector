@@ -45,6 +45,7 @@
 
 (def env
   (pci/register
+    {:pathom/lenient-mode? true}
     [indexes-resolver-wrapped
      indexes-idents
 
