@@ -54,7 +54,7 @@
    (fn track-request-process-ast-external [process]
      (fn track-request-process-ast-internal [{::pcr/keys [root-query] :as env} ast]
        (if root-query
-         (wrapper env root-query (process env ast))
+         (wrapper env root-query #(process env ast))
          (let [root-query (eql/ast->query ast)
                env        (assoc env ::pcr/root-query root-query)]
            (wrapper env (eql/ast->query ast) #(process env ast))))))})
@@ -95,7 +95,7 @@
   are done via HTTP.
   "
   [env {::keys [async?]
-        :or    {async? true}
+        :or    {async? #?(:clj false :cljs true)}
         :as    config}]
   (let [config     (if (string? config) {::pvc/parser-id config} config)
         config     (assoc config

@@ -8,7 +8,7 @@
   com.wsscode/async           {:mvn/version "1.0.11"}
   com.wsscode/promesa-bridges {:mvn/version "2021.01.20"}
   com.wsscode/transito        {:mvn/version "2021.07.04"}
-  http-kit                    {:mvn/version "2.3.0"}}
+  http-kit/http-kit           {:mvn/version "2.3.0"}}
 
  :aliases
  {:provided
@@ -29,9 +29,9 @@
    :main-opts  ["-m" "mach.pack.alpha.skinny" "--project-path" "target/pathom-viz-connector.jar"]}
 
   :deploy
-  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+  {:extra-deps {deps-deploy/deps-deploy {:mvn/version "0.0.9"}}
    :main-opts  ["-m" "deps-deploy.deps-deploy" "deploy" "target/pathom-viz-connector.jar"]}
 
   :install
-  {:extra-deps {deps-deploy {:mvn/version "0.0.9"}}
+  {:extra-deps {deps-deploy/deps-deploy {:mvn/version "0.0.9"}}
    :main-opts  ["-m" "deps-deploy.deps-deploy" "install" "target/pathom-viz-connector.jar"]}}}
