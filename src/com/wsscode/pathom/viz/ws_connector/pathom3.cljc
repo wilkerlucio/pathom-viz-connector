@@ -53,7 +53,10 @@
    :com.wsscode.pathom3.interface.eql/wrap-process-ast
    (fn track-request-process-ast-external [process]
      (fn track-request-process-ast-internal [{::pcr/keys [root-query] :as env} ast]
-       (wrapper env root-query #(process env ast))))})
+       (if root-query
+         (wrapper env root-query (process env ast))
+         (let [root-query (eql/ast->query ast)]
+           (wrapper (assoc env ::pcr/root-query root-query) (eql/ast->query ast) #(process env ast))))))})
 
 (p.plugin/defplugin track-requests
   (request-wrapper-plugin wrap-log-request))
