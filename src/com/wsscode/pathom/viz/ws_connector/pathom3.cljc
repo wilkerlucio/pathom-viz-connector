@@ -55,8 +55,9 @@
      (fn track-request-process-ast-internal [{::pcr/keys [root-query] :as env} ast]
        (if root-query
          (wrapper env root-query (process env ast))
-         (let [root-query (eql/ast->query ast)]
-           (wrapper (assoc env ::pcr/root-query root-query) (eql/ast->query ast) #(process env ast))))))})
+         (let [root-query (eql/ast->query ast)
+               env        (assoc env ::pcr/root-query root-query)]
+           (wrapper env (eql/ast->query ast) #(process env ast))))))})
 
 (p.plugin/defplugin track-requests
   (request-wrapper-plugin wrap-log-request))

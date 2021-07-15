@@ -1,5 +1,9 @@
 # Changelog
 
+## [2021.07.15]
+- Fix bug on Pathom 3 that duplicates entries on boundary interface
+- Fix bug on Pathom 3 that misses the query with AST request on boundary interface
+
 ## [2021.07.14]
 - Handle exceptions
 - Ensure lenient mode in adapter tools
