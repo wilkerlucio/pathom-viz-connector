@@ -2,6 +2,7 @@
 
 ## [2021.07.15-1]
 - Regression fix, the latest version broke Pathom 3 EQL case
+- On CLJ the default kind of parser is serial for Pathom 3
 
 ## [2021.07.15]
 - Fix bug on Pathom 3 that duplicates entries on boundary interface
