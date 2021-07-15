@@ -1,4 +1,4 @@
-(defproject com.wsscode/pathom-viz-connector "2021.07.04"
+(defproject com.wsscode/pathom-viz-connector "2021.07.14"
   :description "Connector tools to use the Pathom Viz Application."
   :url "https://github.com/wilkerlucio/pathom-viz-connector"
   :min-lein-version "2.7.0"
