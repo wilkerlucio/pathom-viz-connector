@@ -94,15 +94,17 @@
   In Clojurescript this will connect to the app using websockets. In Clojure the comes
   are done via HTTP.
   "
-  [env {::keys [async?]
-        :or    {async? #?(:clj false :cljs true)}
-        :as    config}]
+  [{::p.a.eql/keys [parallel?]
+    :as            env}
+   {::keys [async?]
+    :or    {async? #?(:clj false :cljs true)}
+    :as    config}]
   (let [config     (if (string? config) {::pvc/parser-id config} config)
         config     (assoc config
                      :transit/read-handlers pcot/read-handlers
                      :transit/write-handlers pcot/write-handlers)
         inside-env (pci/register env request-snapshots)
-        interface  (if async?
+        interface  (if (or parallel? async?)
                      (p.a.eql/boundary-interface inside-env)
                      (p.eql/boundary-interface inside-env))
         env        (assoc inside-env ::connector (call-connector-impl config interface))]

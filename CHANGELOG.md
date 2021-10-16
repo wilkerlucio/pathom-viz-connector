@@ -1,5 +1,8 @@
 # Changelog
 
+## [2021.10.16]
+- Automatic use async mode when env has parallel config
+
 ## [2021.07.15-1]
 - Regression fix, the latest version broke Pathom 3 EQL case
 - On CLJ the default kind of parser is serial for Pathom 3
