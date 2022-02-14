@@ -16,7 +16,8 @@
     [com.wsscode.pathom3.connect.operation.transit :as pcot]
     [edn-query-language.core :as eql]
     [com.wsscode.pathom3.interface.eql :as p.eql]
-    [com.wsscode.pathom3.connect.planner :as pcp]))
+    [com.wsscode.pathom3.connect.planner :as pcp]
+    [com.wsscode.pathom3.entity-tree :as p.ent]))
 
 (defn- call-connector-impl [config parser]
   #?(:clj  (http-clj/connect-parser config parser)
@@ -32,7 +33,8 @@
     (send-message! env
       {::pvc/type       ::pvc/pathom-request
        ::pvc/request-id id
-       ::pvc/tx         query})
+       ::pvc/tx         query
+       ::pvc/entity     (p.ent/entity env)})
     (clet [res (process)]
       (send-message! env
         {::pvc/type       ::pvc/pathom-request-done

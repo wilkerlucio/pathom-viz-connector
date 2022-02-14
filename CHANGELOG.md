@@ -1,5 +1,8 @@
 # Changelog
 
+## [NEXT]
+- Support entity data for query history in Pathom Viz
+
 ## [2021.10.16]
 - Automatic use async mode when env has parallel config
 
