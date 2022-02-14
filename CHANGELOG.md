@@ -1,6 +1,6 @@
 # Changelog
 
-## [NEXT]
+## [2022.02.14]
 - Support entity data for query history in Pathom Viz
 
 ## [2021.10.16]
