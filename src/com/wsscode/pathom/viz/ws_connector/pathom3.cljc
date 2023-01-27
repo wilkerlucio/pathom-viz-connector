@@ -73,25 +73,18 @@
        :edn-query-language.ast/node source-ast))})
 
 (defn connect-env
-  "Connect a Pathom parser to the Pathom Viz desktop app. The return of this function
-  is a new parser, which will log all queries done to it in the app, a suggested
+  "Connect a Pathom env to the Pathom Viz desktop app. The return of this function
+  is a update env, which will log all queries done to it in the app, a suggested
   pattern to use:
 
-    (def parser
-      (cond->> (p/parser ...)
-        dev-mode?
-        (p.connector/connect-parser
-          {::p.connector/parser-id ::my-parser})))
+      (def env
+        (-> {}
+            (pci/register registry)
+            ; give your environment a name to show in the tab of Pathom viz
+            (p.connector/connect-env \"app name\")))
 
   Make that dev flag something you can turn off in production. This way you can see
   the request in the app as they happen.
-
-  The configuration options available are:
-
-    - `::p.connector/host` (default: localhost) Host of the desktop app background server.
-    - `::p.connector/port` (default: 8240) Port of app background server
-    - `::p.connector/parser-id` - An id for this parser, make it unique for this parser
-      so the app can have better memory about it
 
   In Clojurescript this will connect to the app using websockets. In Clojure the comes
   are done via HTTP.

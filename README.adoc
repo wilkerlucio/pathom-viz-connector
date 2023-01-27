@@ -94,11 +94,10 @@ can communicate with it and track the requests made:
    (pbir/single-attr-resolver :pi :tau #(* 2 %))])
 
 (def env
-  (cond-> (pci/register registry)
-    CONNECT_PARSER?
-    ; give your environment a unique parser-id, this will ensure reconnects work as
-    ; expected
-    (p.connector/connect-env {::pvc/parser-id ::env})))
+  (-> {}
+      (pci/register registry)
+      ; give your environment a name to show in the tab of Pathom viz
+      (p.connector/connect-env "app name")))
 
 (comment
   (p.eql/process env
